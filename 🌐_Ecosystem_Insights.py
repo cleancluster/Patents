@@ -257,7 +257,7 @@ elif st.session_state["authentication_status"] == False:
         st.error(e)
 
 #If user has logged in. 
-elif st.session_state["authentication_status"]:
+elif st.session_state["authentication_status"] == False:
     #If Emil logs in, show admin page
     if st.session_state["name"] == "Emil Hansen":
         add_page("🌐 Ecosystem Insights", "Admin")
