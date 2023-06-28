@@ -1,0 +1,17 @@
+cookie:
+  expiry_days: 62
+  key: xY&Q*Rcj9Y_HLy2V
+  name: CLEAN_Insights_cookie
+credentials:
+  usernames:
+    arl:
+      email: arl@cleancluster.dk
+      name: Anders Larsen
+      password: $2b$12$/H3PuxTzaHIfwq4fgK4MmerN06WB5NLmFdegx0vL.AhNoUjtakBiq
+    esh:
+      email: esh@cleancluster.dk
+      name: Emil Hansen
+      password: $2b$12$Wmj1umWnUcFeOm9CBG469.Q6nb366yTW4z.G2lVA83J8Vx0MfQVJK
+preauthorized:
+  emails:
+  - esh@cleancluster.dk
