@@ -179,10 +179,6 @@ delete_page("🌐 Ecosystem Insights", "Admin")
 #add_page("🌐 Ecosystem Insights", "Page")
 
 
-##
-st.session_state["authentication_status"]==True
-##
-
 
 #If user is not logged in and has not tried loggin in
 if st.session_state["authentication_status"] == None:
