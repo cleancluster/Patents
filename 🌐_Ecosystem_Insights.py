@@ -179,6 +179,11 @@ delete_page("🌐 Ecosystem Insights", "Admin")
 #add_page("🌐 Ecosystem Insights", "Page")
 
 
+##
+st.session_state["authentication_status"]==True
+##
+
+
 #If user is not logged in and has not tried loggin in
 if st.session_state["authentication_status"] == None:
     st.sidebar.warning('Please enter your username and password. \n \n For login credentials, please contact esh@cleancluster.dk 📧')
@@ -257,7 +262,8 @@ elif st.session_state["authentication_status"] == False:
         st.error(e)
 
 #If user has logged in. 
-elif st.session_state["authentication_status"] == False:
+
+elif st.session_state["authentication_status"]:
     #If Emil logs in, show admin page
     if st.session_state["name"] == "Emil Hansen":
         add_page("🌐 Ecosystem Insights", "Admin")
