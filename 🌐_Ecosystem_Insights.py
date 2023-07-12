@@ -18,9 +18,6 @@ import plotly.graph_objects as go
 import re
 import squarify
 
-
-
-
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -124,13 +121,6 @@ def add_logo():
         unsafe_allow_html=True,
     )
 add_logo()
-
-# Login menu in sidebar
-with open('./assets/config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
-with open(r"./assets/connected_dots_viz.html") as f: 
-    html_data = f.read()
 
 ##### Helper functions #####
 def to_excel(df: pd.DataFrame):
