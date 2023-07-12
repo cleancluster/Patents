@@ -205,6 +205,8 @@ with st.sidebar:
     toc.placeholder()
     st.markdown(" ")
 
+st.write(f'Welcome 👋')
+
 toc.header("Fundamental metrics")
 st.sidebar.info('Patents are fundamental prerequisites for innovation and growth. On this page, we have curated 10 years of patent application activity data into useful insights. Data is from the Danish Patent and Trademark Office. You can read more about the data and method at the end of this page', icon="ℹ️")
 
