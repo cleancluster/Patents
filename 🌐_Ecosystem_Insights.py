@@ -121,16 +121,6 @@ with open('./assets/config.yaml') as file:
 with open(r"./assets/connected_dots_viz.html") as f: 
     html_data = f.read()
 
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['preauthorized']
-)
-
-name, authentication_status, username = authenticator.login('Login', 'sidebar')
-
 ##### Helper functions #####
 def to_excel(df: pd.DataFrame):
     output = BytesIO() 
