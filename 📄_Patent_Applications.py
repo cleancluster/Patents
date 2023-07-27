@@ -73,8 +73,6 @@ def add_logo():
     )
 add_logo()
 
-st.write(stauth.Hasher(['tAEQLzvWmREm589T']).generate())
-
 
 # Table of contents menu in sidebar
 class Toc:
