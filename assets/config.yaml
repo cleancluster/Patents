@@ -4,10 +4,10 @@ cookie:
   name: Streamlit_login_cookie
 credentials:
   usernames:
-    Novo:
-      email: emil.hansen62@cleancluster.dk
-      name: Novo Nordisk Fonden
+    admin@cleancluster.dk:
+      email: admin@cleancluster.dk
+      name: Emil
       password: $2b$12$HKcSNq.cjwVkN0uLZtL62.ZyJqmXqcjQKxYsSLfDTFd.5SBRrS6C2
 preauthorized:
   emails:
-  - emil.hansen62@cleancluster.dk
+  - admin@cleancluster.dk
