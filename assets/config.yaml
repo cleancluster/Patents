@@ -7,7 +7,7 @@ credentials:
     admin@cleancluster.dk:
       email: admin@cleancluster.dk
       name: Emil
-      password: $2b$12$HKcSNq.cjwVkN0uLZtL62.ZyJqmXqcjQKxYsSLfDTFd.5SBRrS6C2
+      password: $2b$12$lF5jZZ/H1euashebQQUzfuyG7lGMKyLfEC8dkT83RKPVlDIZMGCNO
 preauthorized:
   emails:
   - admin@cleancluster.dk
