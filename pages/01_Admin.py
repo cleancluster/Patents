@@ -107,8 +107,9 @@ try:
             <html>
             <body>
                 <span>Hi $(Name)!</span><br><br>
-                <span>A new personal user for https://clean-insights.streamlit.app/ has been created for you. Here's your username.</span><br>
-                <span><b>Username:</b> $(username)</span><br><br>
+                <span>A new personal user for https://clean-insights.streamlit.app/ has been created for you.</span><br>
+                <span><b>Username:</b> $(username)</span><br>
+                <span><b>Password:</b> $(username)</span><br><br>
                 <span>Please reset your password the first time you try to log in. This is done by entering your username and pressing the Login button</span><br><br>
                 <span>Best regards</span><br>
                 <span>CLEAN</span>

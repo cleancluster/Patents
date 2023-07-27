@@ -5,6 +5,7 @@ from streamlit_option_menu import option_menu
 
 
 import time
+from streamlit_js_eval import streamlit_js_eval, copy_to_clipboard, create_share_link, get_geolocation
 import pandas as pd
 import plotly.express as px
 import geopandas as gpd
@@ -106,9 +107,22 @@ class Toc:
 
 toc = Toc()
 
+#To delete Admin page, when user is not admin
+from pathlib import Path
+from streamlit.source_util import (
+    page_icon_and_name, 
+    calc_md5, 
+    get_pages,
+    _on_pages_changed
+)
+
 #Particles vizualisation
 with open(r"./assets/connected_dots_viz.html") as f: 
     html_data = f.read()
+
+browser_width = streamlit_js_eval(js_expressions='window.innerWidth', key = 'W')
+browser_height = streamlit_js_eval(js_expressions='window.innerHeight', key = 'H')
+st.components.v1.html(html_data, width=browser_width, height=browser_height, scrolling=False)
 
 # Login menu in sidebar
 with open('./assets/config.yaml') as file:
@@ -126,6 +140,20 @@ name, authentication_status, username = authenticator.login('Login', 'sidebar')
 
 ##### Helper functions #####
 # Get Lottie animation
+
+# Delete (hide) a page
+def delete_page(main_script_path_str, page_name):
+
+    current_pages = get_pages(main_script_path_str)
+
+    for key, value in current_pages.items():
+        if value['page_name'] == page_name:
+            del current_pages[key]
+            break
+        else:
+            pass
+    _on_pages_changed.send()
+
 def load_lottieurl(url: str):
     r = requests.get(url)
     if r.status_code != 200:
@@ -167,6 +195,9 @@ def choose_subsets(df, column_str_list, subset_str_list, pri):
             print('Choosing the rows with "', subset_str_list[i], '" in the "', column_str_list[i], '" column.')
         temp_df = pd.concat([temp_df, df[df[column_str_list[i]] == subset_str_list[i]]])
     return temp_df
+
+#inital hides admin page
+delete_page("📄 Patent Applications", "Admin")
 
 #If user is not logged in and has not tried loggin in
 if st.session_state["authentication_status"] == None:
