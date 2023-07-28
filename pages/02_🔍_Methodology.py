@@ -91,8 +91,8 @@ CPC_IPC_klasser = CPC_IPC_klasser.fillna('')
 
 data_table = st.experimental_data_editor(CPC_IPC_klasser, use_container_width=True)
 
-st.download_button(
-    "⬇️ Download data (.xlsx)", 
+if st.download_button(
+    "Download shown data (.xlsx)", 
     to_excel(data_table),
     "IPC_&_CPC_Classes.xlsx"
 )
