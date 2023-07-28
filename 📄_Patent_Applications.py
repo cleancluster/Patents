@@ -37,7 +37,7 @@ from yaml.loader import SafeLoader
 from PIL import Image
 
 # Sets up Favicon, webpage title and layout
-favicon = Image.open(r"./assets/favicon.png")
+favicon = Image.open(r"./assets/favicon.ico")
 
 st.set_page_config(
     page_title = "Patents dashboard",
@@ -116,14 +116,6 @@ from streamlit.source_util import (
     _on_pages_changed
 )
 
-#Particles vizualisation
-with open(r"./assets/connected_dots_viz.html") as f: 
-    html_data = f.read()
-
-browser_width = streamlit_js_eval(js_expressions='window.innerWidth', key = 'W')
-browser_height = streamlit_js_eval(js_expressions='window.innerHeight', key = 'H')
-st.components.v1.html(html_data, width=browser_width, height=browser_height, scrolling=False)
-
 # Login menu in sidebar
 with open('./assets/config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -169,6 +161,7 @@ def to_excel(df: pd.DataFrame):
     return processed_data
 
 @st.cache_data
+
 def convert_excel(path, sheet_name = 'Ark1', pri = False):
     df = pd.read_excel(path, sheet_name)
     if pri:
@@ -196,13 +189,19 @@ def choose_subsets(df, column_str_list, subset_str_list, pri):
         temp_df = pd.concat([temp_df, df[df[column_str_list[i]] == subset_str_list[i]]])
     return temp_df
 
-#inital hides admin page
+#Inital hides admin page and starts particles vizualisation (height cannot be set dynamically - wokring issue)
 delete_page("📄 Patent Applications", "Admin")
+browser_width = streamlit_js_eval(js_expressions='window.innerWidth', key = 'WIDTH')
+
 
 #If user is not logged in and has not tried loggin in
 if st.session_state["authentication_status"] == None:
     st.sidebar.warning('Please enter your username and password 🔑')
-    st.components.v1.html(html_data, width=None, height=775, scrolling=False)
+
+    #Particles vizualisation
+    with open(r"./assets/connected_dots_viz.html") as f: 
+        html_data = f.read()
+        st.components.v1.html(html_data, width=browser_width, height=775, scrolling=False)
 
 
 #If user has tried loggin in, but has not entered correct credentials
@@ -338,21 +337,21 @@ elif st.session_state["authentication_status"]:
     st.altair_chart(patents, use_container_width=True)
 
     if single_country:
-        st.download_button(
+        if st.download_button(
             label="⬇️ Download data (.xlsx)",
             data = to_excel(b[:mark]),
             file_name="CLEAN_Patents_"+select_country+".xlsx",
             key='patents-data'
-        )
+        ): st.toast('Data was sucessfully exported', icon='✅')
 
     if not single_country:
-        st.download_button(
+        if st.download_button(
             label="⬇️ Download data (.xlsx)",
             data = to_excel(b[:mark]),
             file_name="CLEAN_Patents.xlsx",
             key='patents-data',
             use_container_width=True
-        )
+        ): st.toast('Data was sucessfully exported', icon='✅')
 
     st.write(" ")
     st.write(" ")
@@ -507,13 +506,14 @@ elif st.session_state["authentication_status"]:
     if single_country:
         st.altair_chart(tech_chart, use_container_width=True)
         altered_x = altered_x.drop(["order"], axis=1)
-        st.download_button(
+        if st.download_button(
             label="⬇️ Download data (.xlsx)",
             #data=altered_x.to_csv(index=False).encode(),
             data = to_excel(altered_x),
             file_name="CLEAN_Patents_FocusAreas_"+select_country+".xlsx",
             key='tech-data',
-        )
+        ): st.toast('Data was sucessfully exported', icon='✅')
+
     if not single_country:
         st.altair_chart(tech_chart, use_container_width=True)
         altered_x = altered_x.drop(["order"], axis=1)
@@ -544,14 +544,13 @@ elif st.session_state["authentication_status"]:
             companies = st.session_state.companies.loc[select_country].sort_values(ascending=False)[0:st.session_state.number_of_companies].reset_index()
             companies = companies.rename(columns={0:"patents"})
             companies = companies.rename(columns={"psn_name":"company"})
-            edited_comp = st.experimental_data_editor(companies, use_container_width=True)
-            st.download_button(
+            edited_comp = st.data_editor(companies, use_container_width=True)
+            if st.download_button(
             "⬇️ Download data (.xlsx)", 
-            #edited_comp.to_csv(index=False).encode(),
             to_excel(edited_comp),
             "company_data_"+select_country+".xlsx", 
             use_container_width=True
-            )
+            ): st.toast('Data was sucessfully exported', icon='✅')
         with arr2:
             st.write(" ")
             st.write(" ")

@@ -8,7 +8,7 @@ from streamlit_option_menu import option_menu
 from PIL import Image
 
 # Sets up Favicon, webpage title and layout
-favicon = Image.open(r"./assets/favicon.png")
+favicon = Image.open(r"./assets/favicon.ico")
 
 st.set_page_config(
     page_title = "Methodology",
@@ -65,7 +65,17 @@ def to_excel(df: pd.DataFrame):
     processed_data = output.getvalue() 
     return processed_data
 
-st.sidebar.info("The mapping is done by CLEAN in partnership with IRIS Group and the Danish Patent and Trademark Office. The full report will be published in June 2023.", icon="ℹ️")
+st.sidebar.info("The mapping is done by CLEAN in partnership with IRIS Group and the Danish Patent and Trademark Office. The full report is availble for download.", icon="ℹ️")
+
+with open("./assets/Miljoeteknologi-En-styrkeposition-for-fremtiden.pdf", "rb") as pdf_file:
+    PDFbyte = pdf_file.read()
+
+if st.sidebar.download_button(label="Downlaod report (.pdf)",
+    data=PDFbyte,
+    file_name="Miljoeteknologi-En-styrkeposition-for-fremtiden.pdf",
+    mime='application/octet-stream'):
+    st.toast('Report downloaded', icon='✅')
+
 
 st.title('Methodology')
 st.subheader("Extracting data")
@@ -82,18 +92,20 @@ st.markdown("- A defined selection of IPC/CPC classes is assigened each of CLEAN
 st.markdown("- Specifically for the subarea 'Water', a combination of IPC/CPC classes with certain keywords in the title and/or abstracts has been used.")
 style_bullets()
 
-st.subheader("IPC/CPC classes related to environmental technology", help="The CPC is a patent classification system developed by the European Patent Office (EPO) and United States Patent and Trademark Office (USPTO) that contains approximately 200,000 subgroups. The IPC is a hierarchical classification system consisting of about 70,000 subgroups.")
+st.subheader("IPC/CPC classes related to environmental technology")
+st.markdown("The CPC is a patent classification system developed by the European Patent Office (EPO) and United States Patent and Trademark Office (USPTO) that contains approximately 200,000 subgroups. The IPC is a hierarchical classification system consisting of about 70,000 subgroups.")
 st.markdown("Below, you can find the exact distribution of IPC/CPC classes used:")
 
 CPC_IPC_klasser = convert_excel("./data/CPC_IPC_klasser.xlsx", sheet_name="v2lang")
 
 CPC_IPC_klasser = CPC_IPC_klasser.fillna('')
 
-data_table = st.experimental_data_editor(CPC_IPC_klasser, use_container_width=True)
+data_table = st.data_editor(CPC_IPC_klasser, use_container_width=True)
 
 if st.download_button(
-    "Download shown data (.xlsx)", 
-    to_excel(data_table),
-    "IPC_&_CPC_Classes.xlsx"
-)
+    label='Download data table (.xlsx)', 
+    data=to_excel(data_table),
+    file_name='IPC_&_CPC_Classes.xlsx',
+    mime='application/octet-stream'):
+    st.toast('Data was sucessfully exported', icon='✅')
 
