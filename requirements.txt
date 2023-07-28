@@ -8,7 +8,7 @@ PyYAML==6.0
 bcrypt==4.0.1
 
 # Streamlit
-streamlit==1.22.0
+streamlit==1.25.0
 streamlit-authenticator==0.2.1
 streamlit-option-menu==0.3.2
 plotly-express==0.4.1
