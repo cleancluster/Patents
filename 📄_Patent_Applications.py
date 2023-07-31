@@ -269,6 +269,9 @@ elif st.session_state["authentication_status"]:
     )
     st.plotly_chart(fig2, use_container_width=True, sharing="streamlit", theme="streamlit")
 
+    st.text(" ")
+    st.text(" ")
+
     if single_country:
         mark = b[b["country"]==select_country].index[0]+6
         b['highlight'] = b['country'].apply(lambda x: x == select_country)
@@ -288,19 +291,33 @@ elif st.session_state["authentication_status"]:
         title="Top countries applying for environmental tachnology patents (2011-2022)"
     )
 
-    st.text(" ")
-    st.text(" ")
-
     with chart_container(data=b[:mark], export_formats = (["CSV"])):
         st.altair_chart(patents, use_container_width=True)
 
     st.write(" ")
+
+
+    top_15_grouped_normed = convert_excel("./data/Yearly_change_plot_patents.xlsx", sheet_name="Sheet1")
+    top_15_grouped_normed = top_15_grouped_normed.rename(columns={"person_ctry_code":"Country"})
+    chart10 = alt.Chart(top_15_grouped_normed).mark_line().encode(
+        x=alt.X('earliest_publn_year:O', axis=alt.Axis(title='Year')),
+        y=alt.Y('patents_normed:Q'),
+        color=alt.Color('Country:N', legend=alt.Legend(title='Country')),
+        tooltip=["Country:N"]
+    ).properties(
+        title="Yearly development in amount of applications for a preselected set of countries"
+    ).transform_calculate(tt="datum.x+' value'")
+
+    tt = chart10.mark_line(strokeWidth=30, opacity=0.01)
+    chart10 = chart10 + tt
+
+    with chart_container(data=top_15_grouped_normed, export_formats = (["CSV"])):
+        st.altair_chart(chart10, use_container_width=True)
+
+    st.write(" ")
     st.write(" ")
     
-    st.write("_Select one or more subareas to view distribution of patents:_")
-    st.write(" ")
     # Teknikområde opdeling:
-
     if "tech_normed" not in st.session_state:
         st.session_state.tech_normed = convert_excel("./data/teknikområde_opdelinger_normed.xlsx", sheet_name="Sheet1")
         st.session_state.tech_normed = st.session_state.tech_normed.rename(columns={"Natur": "Soil, Water & Nature", "Luft": "Air", "Vand": "Water in the technosphere", "Klimatilpasning": "Climate adaptation", "Affald": "Waste, Resources & Materials"})
@@ -316,43 +333,13 @@ elif st.session_state["authentication_status"]:
     if not checked:
         x = st.session_state.tech
 
-    col_vand, col_luft, col_affald, col_klima, col_natur = st.columns(5)
-    water_img = Image.open('assets/fokusområde_vand_i_teknosfæren_color.png')
-    air_img = Image.open("assets/fokusområde_luft_color.png")
-    garbage_img = Image.open("assets/fokusområde_affald_ressourcer_materialer_color.png")
-    climate_img = Image.open("assets/fokusområde_klimatilpasning_color.png")
-    nature_img = Image.open("assets/fokusområde_jord_vand_natur_color.png")
-
-
-    w = 50
-    with col_vand:
-        st.image(water_img, width=w)
-    with col_luft:
-        st.image(air_img, width=w)
-    with col_affald:
-        st.image(garbage_img, width=w)
-    with col_klima:
-        st.image(climate_img, width=w)
-    with col_natur:
-        st.image(nature_img, width=w)
-
-
-    col_vand2, col_luft2, col_affald2, col_klima2, col_natur2 = st.columns(5)
-    with col_vand2:
-        water_button = st.button("Water", key="Water_tech")
-    with col_luft2:
-        air_button = st.button("Air", key="Air_tech")
-    with col_affald2:
-        garbage_button = st.button("Waste", key="Waste_tech")
-    with col_klima2:
-        climate_button = st.button("Climate", key="Climate_tech")
-    with col_natur2:
-        nature_button = st.button("Nature", key="Nature_tech")
-
+    options = st.multiselect(
+    'Select one or more subareas to view distribution of patents:',
+    ['Water', 'Air', 'Waste', 'Climate', 'Nature'],
+    ['Water'])
 
     if "selected_tech" not in st.session_state:
         st.session_state.selected_tech = []
-
 
     def onclick():
         x_temp = x[st.session_state.selected_tech]
@@ -370,43 +357,34 @@ elif st.session_state["authentication_status"]:
         x_temp = x_temp[x_temp["country"].isin(top_k)]
         x_temp["country"] = x_temp['country'].str.strip()
         x_temp['order'] = x_temp['tech'].replace({val: i for i, val in enumerate(['Soil, Water & Nature', 'Air', 'Water in the technosphere', 'Climate adaptation', "Waste, Resources & Materials"])})
-        # highlight_category = x_temp.loc[x_temp['Country'] == "Denmark", 'Country'].iloc[0]
-        # x_temp['Highlight'] = x_temp['country'].apply(lambda x: x == "Denmark")
         return x_temp
 
     altered_x = onclick()
-    if water_button:
-        if "Water in the technosphere" not in st.session_state.selected_tech:
+
+    if options:
+        if "Water in the technosphere" not in st.session_state.selected_tech and "Water" in options:
             st.session_state.selected_tech.append("Water in the technosphere")
-        else:
+        elif "Water in the technosphere" in st.session_state.selected_tech and "Water" not in options:
             st.session_state.selected_tech.remove("Water in the technosphere")
-        altered_x = onclick()
 
-    if air_button:
-        if "Air" not in st.session_state.selected_tech:
+        if "Air" not in st.session_state.selected_tech and "Air" in options:
             st.session_state.selected_tech.append("Air")
-        else:
+        elif "Air" in st.session_state.selected_tech and "Air" not in options:
             st.session_state.selected_tech.remove("Air")
-        altered_x = onclick()
 
-    if garbage_button:
-        if "Waste, Resources & Materials" not in st.session_state.selected_tech:
+        if "Waste, Resources & Materials" not in st.session_state.selected_tech and "Waste" in options:
             st.session_state.selected_tech.append("Waste, Resources & Materials")
-        else:
+        elif "Waste, Resources & Materials" in st.session_state.selected_tech and "Waste" not in options:
             st.session_state.selected_tech.remove("Waste, Resources & Materials")
-        altered_x = onclick()
 
-    if climate_button:
-        if "Climate adaptation" not in st.session_state.selected_tech:
+        if "Climate adaptation" not in st.session_state.selected_tech and "Climate" in options:
             st.session_state.selected_tech.append("Climate adaptation")
-        else:
+        elif "Climate adaptation" in st.session_state.selected_tech and "Climate" not in options:
             st.session_state.selected_tech.remove("Climate adaptation")
-        altered_x = onclick()
 
-    if nature_button:
-        if "Soil, Water & Nature" not in st.session_state.selected_tech:
+        if "Soil, Water & Nature" not in st.session_state.selected_tech and "Nature" in options:
             st.session_state.selected_tech.append("Soil, Water & Nature")
-        else:
+        elif "Soil, Water & Nature" in st.session_state.selected_tech and "Nature" not in options:
             st.session_state.selected_tech.remove("Soil, Water & Nature")
         altered_x = onclick()
 
@@ -426,7 +404,7 @@ elif st.session_state["authentication_status"]:
 
     if checked:
         tech_chart = alt.Chart(altered_x).mark_bar().encode(
-            x=alt.X('patents:Q', stack='zero', axis=alt.Axis(title='Patents pr. 100.00 inhabitants')),
+            x=alt.X('patents:Q', stack='zero', axis=alt.Axis(title='Patents per 100.000 inhabitants')),
             y=alt.Y('country:N', axis=alt.Axis(title='country'), sort="-x"),
             color=alt.Color('tech:N', sort=['Soil, Water & Nature', 'Air', 'Water in the technosphere', 'Climate adaptation', 'Waste, Resources & Materials'], scale=color_scale, legend=alt.Legend(title='Focus area')),
             order=alt.Order("order:N", sort="ascending"),
@@ -449,7 +427,6 @@ elif st.session_state["authentication_status"]:
         altered_x = altered_x.drop(["order"], axis=1)
         if st.download_button(
             label="Download data (.xlsx)",
-            #data=altered_x.to_csv(index=False).encode(),
             data = to_excel(altered_x),
             file_name="CLEAN_Patents_FocusAreas_"+select_country+".xlsx",
             key='tech-data',
@@ -460,12 +437,14 @@ elif st.session_state["authentication_status"]:
         altered_x = altered_x.drop(["order"], axis=1)
         st.download_button(
             label="Download data (.xlsx)",
-            #data=altered_x.to_csv(index=False).encode(),
             data = to_excel(altered_x),
             file_name="CLEAN_Patents_FocusAreas.xlsx",
             key='tech-data',
         )
-    
+
+
+
+
     if single_country:
         st.markdown("""---""")
         st.header("The companies")
@@ -505,10 +484,12 @@ elif st.session_state["authentication_status"]:
             st.write(" ")
             st.write(" ")
             st.write(" ")
+
             st.write("- **Column sorting:** Sort columns by clicking on their headers.")
             st.write("- **Search:** Search through data by clicking a table, using hotkeys (⌘ Cmd + F or Ctrl + F) to bring up the search bar, and using the search bar to filter data.")
             st.write("- **Copy to clipboard:** Select one or multiple cells, copy them to the clipboard and paste them into your favorite spreadsheet software.")
             
+
     spread_df = convert_excel("./data/spread_data.xlsx", sheet_name="Sheet1")
     if single_country:
         mark3 = spread_df[spread_df["Country"]==select_country].index[0]+6
@@ -539,18 +520,4 @@ elif st.session_state["authentication_status"]:
 
     st.markdown("""---""")
 
-    st.header("Yearly development in amount of applications")
-    top_15_grouped_normed = convert_excel("./data/Yearly_change_plot_patents.xlsx", sheet_name="Sheet1")
-    top_15_grouped_normed = top_15_grouped_normed.rename(columns={"person_ctry_code":"Country"})
-    chart10 = alt.Chart(top_15_grouped_normed).mark_line().encode(
-        x=alt.X('earliest_publn_year:O', axis=alt.Axis(title='Year')),
-        y=alt.Y('patents_normed:Q'),
-        color=alt.Color('Country:N', legend=alt.Legend(title='Country')),
-        tooltip=["Country:N"]
-    ).properties(
-        title="Change in patents on a yearly basis for a preselected set of countries"
-    ).transform_calculate(tt="datum.x+' value'")
-
-    tt = chart10.mark_line(strokeWidth=30, opacity=0.01)
-    chart10 = chart10 + tt
-    st.altair_chart(chart10, use_container_width=True)
+    #st.header("Yearly development in amount of applications")  
