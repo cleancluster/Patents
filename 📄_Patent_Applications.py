@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
 from streamlit_option_menu import option_menu
+from streamlit_extras.chart_container import chart_container
 
 
 import time
@@ -23,11 +24,6 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 pd.options.mode.chained_assignment = None  # default='warn'
 
-#For Lottie animations
-from streamlit_lottie import st_lottie
-from streamlit_lottie import st_lottie_spinner
-import requests
-
 #For login part (necsesary for streamlit_authenticator)
 import yaml
 from yaml import load, dump
@@ -44,7 +40,6 @@ st.set_page_config(
     page_icon = favicon,
     layout="wide"
 )
-
 
 # Top sidebar logo + removal of "Made with Streamlit" & Streamlit menu + no padding top and bottom
 def add_logo():
@@ -74,39 +69,6 @@ def add_logo():
     )
 add_logo()
 
-
-# Table of contents menu in sidebar
-class Toc:
-
-    def __init__(self):
-        self._items = []
-        self._placeholder = None
-    
-    def title(self, text):
-        self._markdown(text, "h1")
-
-    def header(self, text):
-        self._markdown(text, "h2", " " * 2)
-
-    def subheader(self, text):
-        self._markdown(text, "h3", " " * 4)
-
-    def placeholder(self, sidebar=False):
-        self._placeholder = st.sidebar.empty() if sidebar else st.empty()
-
-    def generate(self):
-        if self._placeholder:
-            self._placeholder.markdown("\n".join(self._items), unsafe_allow_html=True)
-    
-    def _markdown(self, text, level, space=""):
-        #key = "".join(filter(str.isalnum, text)).lower()
-        key = re.sub('[^0-9a-zA-Z]+', '-', text).lower()
-
-        st.markdown(f"<{level} id='{key}'>{text}</{level}>", unsafe_allow_html=True)
-        self._items.append(f"{space}* <a href='#{key}'>{text}</a>")
-
-toc = Toc()
-
 #To delete Admin page, when user is not admin
 from pathlib import Path
 from streamlit.source_util import (
@@ -131,8 +93,6 @@ authenticator = stauth.Authenticate(
 name, authentication_status, username = authenticator.login('Login', 'sidebar')
 
 ##### Helper functions #####
-# Get Lottie animation
-
 # Delete (hide) a page
 def delete_page(main_script_path_str, page_name):
 
@@ -191,7 +151,6 @@ def choose_subsets(df, column_str_list, subset_str_list, pri):
 
 #Inital hides admin page and starts particles vizualisation (height cannot be set dynamically - wokring issue)
 delete_page("📄 Patent Applications", "Admin")
-browser_width = streamlit_js_eval(js_expressions='window.innerWidth', key = 'WIDTH')
 
 
 #If user is not logged in and has not tried loggin in
@@ -201,28 +160,21 @@ if st.session_state["authentication_status"] == None:
     #Particles vizualisation
     with open(r"./assets/connected_dots_viz.html") as f: 
         html_data = f.read()
+        browser_width = streamlit_js_eval(js_expressions='window.innerWidth', key = 'WIDTH')
         st.components.v1.html(html_data, width=browser_width, height=775, scrolling=False)
-
 
 #If user has tried loggin in, but has not entered correct credentials
 elif st.session_state["authentication_status"] == False:
     st.sidebar.error("Username/password is incorrect.")
-    st.components.v1.html(html_data, width=None, height=775, scrolling=False)
+    #Particles vizualisation
+    with open(r"./assets/connected_dots_viz.html") as f: 
+        html_data = f.read()
+        browser_width = streamlit_js_eval(js_expressions='window.innerWidth', key = 'WIDTH')
+        st.components.v1.html(html_data, width=browser_width, height=775, scrolling=False)
 
 #If user has logged in. 
 elif st.session_state["authentication_status"]:
-    st.write(f'Welcome *{st.session_state["name"]}* 👋')
-    st.write("_Please allow some time for the app to load the data. After first load, data is cached and the app will run smoother._")
-
-    authenticator.logout('Logout', 'sidebar')
-
-    with st.sidebar:
-        st.header("Table of contents")
-        toc.placeholder()
-        st.markdown(" ")
-
-    toc.header("Key metrics")
-    st.sidebar.info('Patents are fundamental prerequisites for innovation and growth. On this page, we have curated 10 years of patent application activity data into useful insights. Data is from the Danish Patent and Trademark Office. You can read more about the data and method at the end of this page', icon="ℹ️")
+    st.header("Key metrics")
 
     if "rådata" not in st.session_state:
         st.session_state.rådata = convert_excel("./data/Miljøteknologi rådata_new2.xlsx", sheet_name="Sheet1", pri=False)
@@ -252,12 +204,13 @@ elif st.session_state["authentication_status"]:
         st.session_state.number_of_instances = 10
     st.markdown("""---""")
 
-    st.subheader("⚙ These filters will affect all below visualisations")
-    input1, input2 = st.columns(2)
-    st.markdown("""---""")
+    st.sidebar.write(f'Welcome *{st.session_state["name"]}* 👋')
+    st.sidebar.write("Please proceed by setting the following filters:")
+    input1 = st.sidebar
+    input2 = st.sidebar
+    
 
-    toc.header("Country comparison ")
-    st.write(" ")
+    st.header("Country comparison")
     with input1:
         single_country = st.checkbox("Inspect a specific country", value=True, key="single_country_selectbox")
         checked = st.checkbox(label="View patents per 100.000 inhabitants", value=True, key="norm_checkbox")
@@ -269,8 +222,12 @@ elif st.session_state["authentication_status"]:
         if not single_country:
             with input2:
                 st.session_state.number_of_instances = st.number_input('Choose the amount of top countries you would like to view:', value = st.session_state.number_of_instances, key="number_countries_input")
-                # st.write('You have chosen to show ', st.session_state.number_of_instances,' countries')
     
+
+    st.sidebar.markdown("""---""")
+    st.sidebar.info('Patents are fundamental prerequisites for innovation and growth. On this page, we have curated 10 years (2011-2022) of patent application activity data into useful insights. Data is from the PATSTAT database, processed by the Danish Patent and Trademark Office. You can read more about the data and method on the methodology page.', icon="ℹ️")
+    st.sidebar.markdown("""---""")
+    authenticator.logout('Logout', 'sidebar')
 
     if checked:
         x_values = "Patents/(inhabitants/100000)"
@@ -292,7 +249,7 @@ elif st.session_state["authentication_status"]:
         locations = b[:mark]['ISO_3_alpha'],
         z = b[:mark][x_values],
         text = b[:mark]['country'],
-        colorscale = 'YlGn',
+        colorscale = 'algae',
         autocolorscale=False,
         reversescale=False,
         marker_line_color='darkgray',
@@ -307,7 +264,6 @@ elif st.session_state["authentication_status"]:
         geo=dict(
             showframe=False,
             showcoastlines=True,
-            #projection_type="natural earth" #'equirectangular'
         ),
         geo_bgcolor="#0E1117"
     )
@@ -329,29 +285,14 @@ elif st.session_state["authentication_status"]:
         alt.value('#85C7A6')),
         tooltip=['country', x_values+":Q"]
     ).properties(
-        title="Patents / 100.000 inhabitants for top countries"
+        title="Top countries applying for environmental tachnology patents (2011-2022)"
     )
 
     st.text(" ")
     st.text(" ")
-    st.altair_chart(patents, use_container_width=True)
 
-    if single_country:
-        if st.download_button(
-            label="⬇️ Download data (.xlsx)",
-            data = to_excel(b[:mark]),
-            file_name="CLEAN_Patents_"+select_country+".xlsx",
-            key='patents-data'
-        ): st.toast('Data was sucessfully exported', icon='✅')
-
-    if not single_country:
-        if st.download_button(
-            label="⬇️ Download data (.xlsx)",
-            data = to_excel(b[:mark]),
-            file_name="CLEAN_Patents.xlsx",
-            key='patents-data',
-            use_container_width=True
-        ): st.toast('Data was sucessfully exported', icon='✅')
+    with chart_container(data=b[:mark], export_formats = (["CSV"])):
+        st.altair_chart(patents, use_container_width=True)
 
     st.write(" ")
     st.write(" ")
@@ -502,12 +443,12 @@ elif st.session_state["authentication_status"]:
         )
 
     # A horizontal bar plot showcasing how the patents spread across focus areas
-    st.write("**Patents / 100.000 inhabitants distributed by subareas for top countries**")
+    st.write("**Patents applications distributed by subareas for top countries**")
     if single_country:
         st.altair_chart(tech_chart, use_container_width=True)
         altered_x = altered_x.drop(["order"], axis=1)
         if st.download_button(
-            label="⬇️ Download data (.xlsx)",
+            label="Download data (.xlsx)",
             #data=altered_x.to_csv(index=False).encode(),
             data = to_excel(altered_x),
             file_name="CLEAN_Patents_FocusAreas_"+select_country+".xlsx",
@@ -518,7 +459,7 @@ elif st.session_state["authentication_status"]:
         st.altair_chart(tech_chart, use_container_width=True)
         altered_x = altered_x.drop(["order"], axis=1)
         st.download_button(
-            label="⬇️ Download data (.xlsx)",
+            label="Download data (.xlsx)",
             #data=altered_x.to_csv(index=False).encode(),
             data = to_excel(altered_x),
             file_name="CLEAN_Patents_FocusAreas.xlsx",
@@ -527,7 +468,7 @@ elif st.session_state["authentication_status"]:
     
     if single_country:
         st.markdown("""---""")
-        toc.header("The companies")
+        st.header("The companies")
         arr1, arr2 = st.columns(2)
         with arr1:
             amount_companies = '{:,}'.format(len(st.session_state.rådata[st.session_state.rådata["person_ctry_code"] == str(select_country)]["psn_name"].unique())).replace(',','.')
@@ -546,7 +487,7 @@ elif st.session_state["authentication_status"]:
             companies = companies.rename(columns={"psn_name":"company"})
             edited_comp = st.data_editor(companies, use_container_width=True)
             if st.download_button(
-            "⬇️ Download data (.xlsx)", 
+            "Download data (.xlsx)", 
             to_excel(edited_comp),
             "company_data_"+select_country+".xlsx", 
             use_container_width=True
@@ -564,14 +505,9 @@ elif st.session_state["authentication_status"]:
             st.write(" ")
             st.write(" ")
             st.write(" ")
-            st.write(" ")
-            st.write("- Column sorting: sort columns by clicking on their headers.")
-            st.write("- Column resizing: resize columns by dragging and dropping column header borders.")
-            st.write("- Table resizing: resize tables by dragging and dropping the bottom right corner.")
-            st.write("- Search: search through data by clicking a table, using hotkeys (⌘ Cmd + F or Ctrl + F) to bring up the search bar, and using the search bar to filter data.")
-            st.write("- Copy to clipboard: select one or multiple cells, copy them to the clipboard and paste them into your favorite spreadsheet software.")
-            st.write("- To add new rows, scroll to the bottom-most row and click on the “+” sign in any cell.")
-            st.write("- To delete rows, select one or more rows and press the delete key on your keyboard.")
+            st.write("- **Column sorting:** Sort columns by clicking on their headers.")
+            st.write("- **Search:** Search through data by clicking a table, using hotkeys (⌘ Cmd + F or Ctrl + F) to bring up the search bar, and using the search bar to filter data.")
+            st.write("- **Copy to clipboard:** Select one or multiple cells, copy them to the clipboard and paste them into your favorite spreadsheet software.")
             
     spread_df = convert_excel("./data/spread_data.xlsx", sheet_name="Sheet1")
     if single_country:
@@ -584,24 +520,26 @@ elif st.session_state["authentication_status"]:
 
     chart2 = alt.Chart(spread_df[:mark3]).mark_bar().encode(
         y = alt.Y("Country:N",sort='-x'),
-        x = alt.X("Spread:Q", axis=alt.Axis(title="Number of patents / number of different companies that applied for a patent")),
+        x = alt.X("Spread:Q", axis=alt.Axis(title="Spred (total no. of companies/country / total no. of patent applications)")),
         color=alt.condition(
         alt.datum.Highlight,
         alt.value('#367366'),
         alt.value('#85C7A6')),
         tooltip=["Country:N", "Spread:Q"]
     ).properties(
-        title="Spread of patents across companies"
+        title="Spread of patents across a country's companies"
     )
 
     st.write(" ")
     st.write(" ")
+
     # Display chart in Streamlit
-    st.altair_chart(chart2, use_container_width=True)
+    with chart_container(data=spread_df[:mark3], export_formats = (["CSV"])):
+        st.altair_chart(chart2, use_container_width=True)
 
     st.markdown("""---""")
 
-    toc.header("Yearly development in amount of applications")
+    st.header("Yearly development in amount of applications")
     top_15_grouped_normed = convert_excel("./data/Yearly_change_plot_patents.xlsx", sheet_name="Sheet1")
     top_15_grouped_normed = top_15_grouped_normed.rename(columns={"person_ctry_code":"Country"})
     chart10 = alt.Chart(top_15_grouped_normed).mark_line().encode(
@@ -616,6 +554,3 @@ elif st.session_state["authentication_status"]:
     tt = chart10.mark_line(strokeWidth=30, opacity=0.01)
     chart10 = chart10 + tt
     st.altair_chart(chart10, use_container_width=True)
-
-
-    toc.generate()
