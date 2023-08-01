@@ -65,7 +65,7 @@ def to_excel(df: pd.DataFrame):
     processed_data = output.getvalue() 
     return processed_data
 
-st.sidebar.info("The mapping is done by CLEAN in partnership with IRIS Group and the Danish Patent and Trademark Office. The full report is availble for download:", icon="ℹ️")
+st.sidebar.info("The mapping is done by CLEAN in partnership with IRIS Group and the Danish Patent and Trademark Office. The full report is availble for download", icon="ℹ️")
 
 with open("./assets/Miljoeteknologi-En-styrkeposition-for-fremtiden.pdf", "rb") as pdf_file:
     PDFbyte = pdf_file.read()
