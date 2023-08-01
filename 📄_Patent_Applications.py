@@ -204,7 +204,7 @@ elif st.session_state["authentication_status"]:
         st.session_state.number_of_instances = 10
     st.markdown("""---""")
 
-    st.sidebar.write(f'Welcome *{st.session_state["name"]}* 👋')
+    st.sidebar.write(f'Welcome 👋')
     st.sidebar.write("Please proceed by setting the following filters:")
     input1 = st.sidebar
     input2 = st.sidebar
