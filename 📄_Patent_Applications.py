@@ -320,12 +320,12 @@ elif st.session_state["authentication_status"]:
     # Teknikområde opdeling:
     if "tech_normed" not in st.session_state:
         st.session_state.tech_normed = convert_excel("./data/teknikområde_opdelinger_normed.xlsx", sheet_name="Sheet1")
-        st.session_state.tech_normed = st.session_state.tech_normed.rename(columns={"Natur": "Soil, Water & Nature", "Luft": "Air", "Vand": "Water in the technosphere", "Klimatilpasning": "Climate adaptation", "Affald": "Waste, Resources & Materials"})
+        st.session_state.tech_normed = st.session_state.tech_normed.rename(columns={"Natur": "Nature", "Luft": "Air", "Vand": "Water", "Klimatilpasning": "Climate", "Affald": "Waste, Resources & Materials"})
         st.session_state.tech_normed.drop(st.session_state.tech_normed[st.session_state.tech_normed["country"]=="Cayman Islands"].index, axis=0, inplace=True)
         
     if "tech" not in st.session_state:
         st.session_state.tech = convert_excel("./data/teknikområde_opdelinger.xlsx", sheet_name="Sheet1")
-        st.session_state.tech = st.session_state.tech.rename(columns={"Natur": "Soil, Water & Nature", "Luft": "Air", "Vand": "Water in the technosphere", "Klimatilpasning": "Climate adaptation", "Affald": "Waste, Resources & Materials"})
+        st.session_state.tech = st.session_state.tech.rename(columns={"Natur": "Nature", "Luft": "Air", "Vand": "Water", "Klimatilpasning": "Climate", "Affald": "Waste, Resources & Materials"})
         st.session_state.tech.drop(st.session_state.tech[st.session_state.tech["country"]=="Cayman Islands"].index, axis=0, inplace=True)
     
     if checked:
@@ -335,7 +335,7 @@ elif st.session_state["authentication_status"]:
 
     options = st.multiselect(
     'Select one or more subareas to view distribution of patents:',
-    ['Water', 'Air', 'Waste', 'Climate', 'Nature'],
+    ['Water', 'Air', 'Waste, Resources & Materials', 'Climate', 'Nature'],
     ['Water'])
 
     if "selected_tech" not in st.session_state:
@@ -356,39 +356,39 @@ elif st.session_state["authentication_status"]:
         x_temp = x_temp.melt(id_vars=['country'], var_name='tech', value_name='patents')
         x_temp = x_temp[x_temp["country"].isin(top_k)]
         x_temp["country"] = x_temp['country'].str.strip()
-        x_temp['order'] = x_temp['tech'].replace({val: i for i, val in enumerate(['Soil, Water & Nature', 'Air', 'Water in the technosphere', 'Climate adaptation', "Waste, Resources & Materials"])})
+        x_temp['order'] = x_temp['tech'].replace({val: i for i, val in enumerate(['Nature', 'Air', 'Water', 'Climate', "Waste, Resources & Materials"])})
         return x_temp
 
     altered_x = onclick()
 
     if options:
-        if "Water in the technosphere" not in st.session_state.selected_tech and "Water" in options:
-            st.session_state.selected_tech.append("Water in the technosphere")
-        elif "Water in the technosphere" in st.session_state.selected_tech and "Water" not in options:
-            st.session_state.selected_tech.remove("Water in the technosphere")
+        if "Water" not in st.session_state.selected_tech and "Water" in options:
+            st.session_state.selected_tech.append("Water")
+        elif "Water" in st.session_state.selected_tech and "Water" not in options:
+            st.session_state.selected_tech.remove("Water")
 
         if "Air" not in st.session_state.selected_tech and "Air" in options:
             st.session_state.selected_tech.append("Air")
         elif "Air" in st.session_state.selected_tech and "Air" not in options:
             st.session_state.selected_tech.remove("Air")
 
-        if "Waste, Resources & Materials" not in st.session_state.selected_tech and "Waste" in options:
+        if "Waste, Resources & Materials" not in st.session_state.selected_tech and "Waste, Resources & Materials" in options:
             st.session_state.selected_tech.append("Waste, Resources & Materials")
-        elif "Waste, Resources & Materials" in st.session_state.selected_tech and "Waste" not in options:
+        elif "Waste, Resources & Materials" in st.session_state.selected_tech and "Waste, Resources & Materials" not in options:
             st.session_state.selected_tech.remove("Waste, Resources & Materials")
 
-        if "Climate adaptation" not in st.session_state.selected_tech and "Climate" in options:
-            st.session_state.selected_tech.append("Climate adaptation")
-        elif "Climate adaptation" in st.session_state.selected_tech and "Climate" not in options:
-            st.session_state.selected_tech.remove("Climate adaptation")
+        if "Climate" not in st.session_state.selected_tech and "Climate" in options:
+            st.session_state.selected_tech.append("Climate")
+        elif "Climate" in st.session_state.selected_tech and "Climate" not in options:
+            st.session_state.selected_tech.remove("Climate")
 
-        if "Soil, Water & Nature" not in st.session_state.selected_tech and "Nature" in options:
-            st.session_state.selected_tech.append("Soil, Water & Nature")
-        elif "Soil, Water & Nature" in st.session_state.selected_tech and "Nature" not in options:
-            st.session_state.selected_tech.remove("Soil, Water & Nature")
+        if "Nature" not in st.session_state.selected_tech and "Nature" in options:
+            st.session_state.selected_tech.append("Nature")
+        elif "Nature" in st.session_state.selected_tech and "Nature" not in options:
+            st.session_state.selected_tech.remove("Nature")
         altered_x = onclick()
 
-    color_scale = alt.Scale(domain=['Soil, Water & Nature', 'Air', 'Water in the technosphere', 'Climate adaptation', 'Waste, Resources & Materials'],
+    color_scale = alt.Scale(domain=['Nature', 'Air', 'Water', 'Climate', 'Waste, Resources & Materials'],
                     range=['#FF5300', '#FCAA00', '#293972', '#5D9BA8', '#85C7A6'])
 
     if single_country:
@@ -406,7 +406,7 @@ elif st.session_state["authentication_status"]:
         tech_chart = alt.Chart(altered_x).mark_bar().encode(
             x=alt.X('patents:Q', stack='zero', axis=alt.Axis(title='Patents per 100.000 inhabitants')),
             y=alt.Y('country:N', axis=alt.Axis(title='country'), sort="-x"),
-            color=alt.Color('tech:N', sort=['Soil, Water & Nature', 'Air', 'Water in the technosphere', 'Climate adaptation', 'Waste, Resources & Materials'], scale=color_scale, legend=alt.Legend(title='Focus area')),
+            color=alt.Color('tech:N', sort=['Nature', 'Air', 'Water', 'Climate', 'Waste, Resources & Materials'], scale=color_scale, legend=alt.Legend(title='Focus area')),
             order=alt.Order("order:N", sort="ascending"),
             tooltip=['country:N', 'tech:N', 'patents:Q']
         )
