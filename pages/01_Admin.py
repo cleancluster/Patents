@@ -41,7 +41,7 @@ def add_logo():
         """
         <style>
             [data-testid="stSidebarNav"] {
-                background-image: url(https://cleancluster.dk/wp-content/uploads/2022/09/CLEAN-logo-white.png);
+                background-image: url("https://www.cleancluster.dk/wp-content/uploads/2023/10/Clean_Logo_Black_RGB.png");
                 background-repeat: no-repeat;
                 background-position: 20px 20px;
                 background-size: 265px;
