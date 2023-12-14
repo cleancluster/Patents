@@ -6,8 +6,17 @@ credentials:
   usernames:
     admin@cleancluster.dk:
       email: admin@cleancluster.dk
+<<<<<<< Updated upstream
       name: Emil
       password: $2b$12$xC3.Np6P0AHbXfJfoqcNbu4E0J4C7CtTyjfd0IvFTRZh0fuzvWkM.
+=======
+      name: Employee
+      password: $2b$12$vncGx0gMwZMaS8IcLA5x9OrTlAYuiIguV73MDtDJQWf0nW5qEwhWG
+    esh:
+      email: esh@cleancluster.dk
+      name: Emil Hansen
+      password: $2b$12$Wmj1umWnUcFeOm9CBG469.Q6nb366yTW4z.G2lVA83J8Vx0MfQVJK
+>>>>>>> Stashed changes
 preauthorized:
   emails:
   - admin@cleancluster.dk
